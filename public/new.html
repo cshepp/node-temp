@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title></title>
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="public/js/bootstrap.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+		var socket = new io.connect();
+
+		socket.on('connect', function(){
+			console.log('connected');
+
+			
+		});
+
+		socket.on('status', function(status){
+			if(status == "ok"){
+				alert("Saved");
+			}
+			else{
+				alert("Error");
+			}
+		});
+
+		function log(){
+			var temp = $("#tempSelect").val();
+			var now = new Date().toString();
+			var data = {'temp': temp, 'time': now};
+			console.log(data);	
+			socket.emit('newThermLog', data);
+		}
+	</script>
+	<link rel="stylesheet" href="public/css/bootstrap.css">
+	<link rel="stylesheet" href="public/css/bootstrap-responsive.css">
+	<meta name="viewport" content="width=device-width, initial-scale-1">
+</head>
+<body>
+<div class="navbar navbar-static-top">
+	<div class="navbar-inner">
+		<div class="container">
+			<a class="brand" href="/">node-temp</a>
+			<ul class="nav pull-right">
+				<li><a class="active" href="#">New Entry</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="container" style="margin-top:30px;">
+<div class="row-fluid" style="text-align:center"><h2>New Thermostat Log</h2></div>
+<div class="row-fluid" style="text-align:center;">
+	<select id="tempSelect">
+		<option value="72">72</option>
+		<option value="71">71</option>
+		<option value="70">70</option>
+		<option value="69">69</option>
+		<option value="68">68</option>
+		<option value="67">67</option>
+		<option value="66">66</option>
+		<option value="65">65</option>
+		<option value="64">64</option>
+		<option value="63">63</option>
+		<option value="62">62</option>
+		<option value="61">61</option>
+		<option value="60">60</option>
+	</select>
+	<br />
+	<a href="javascript: log()" class="btn btn-large btn-success">Submit</a>
+</div> <!--END CONTAINER-->
+</body>
+</html>

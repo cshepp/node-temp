@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title></title>
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="public/js/bootstrap.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://www.google.com/jsapi"></script>
+	<script>
+
+	function initSockets(){
+		var socket = new io.connect();
+
+		socket.on('connect', function(){
+			console.log('connected');
+
+			socket.on('newData', function(data){
+				var items = data.items;
+				var changes = data.changes;
+
+				var graphData = convertData(items, changes);
+				draw(graphData, options);
+			});
+		
+			function getData(){
+				socket.emit('requestData');
+			}
+			window.setInterval(getData(), 5000);
+		});
+	} //end initSockets
+
+	google.load('visualization', '1.0', {'packages': ['corechart']});
+	google.setOnLoadCallback(initSockets);
+
+	var options = {
+		'title': 'Temperature over time | Resolution = 1 min',
+		'vAxis': {'maxValue': 72, 'minValue': 60}
+	};
+
+	function convertData(items, changes){
+		var graphData = new google.visualization.DataTable();
+		graphData.addColumn('datetime', 'Date');
+		graphData.addColumn('number', 'Temperature');
+		//graphData.addColumn('number', 'Thermostat');
+
+		var currentTherm;
+
+		for(var i in items){
+
+			/*for(var j in changes){
+				if(changes[j].time == items[i].time){
+					currentTherm = changes[j].temp;
+					break;
+				}
+			}
+			graphData.addRows([
+				[new Date(items[i].time), items[i].temp, currentTherm]
+			]);*/
+
+			graphData.addRows([
+				[new Date(items[i].time), parseInt(items[i].temp)]
+			]);
+		}
+
+		return graphData;
+	}
+
+	function draw(data, options){
+		var chart = new google.visualization.LineChart(document.getElementById('print'));
+		chart.draw(data, options);
+		if(!chart.error){
+
+		}
+		else{
+			$("#print").html("<p>Chart not available on your device</p>");
+		}		
+	}
+
+	</script>
+	<link rel="stylesheet" href="public/css/bootstrap.css">
+	<link rel="stylesheet" href="public/css/bootstrap-responsive.css">
+	<meta name="viewport" content="width=device-width, initial-scale-1">
+</head>
+<body>
+<div class="navbar navbar-static-top">
+	<div class="navbar-inner">
+		<div class="container">
+			<a class="brand" href="#">node-temp</a>
+			<ul class="nav pull-right">
+				<li><a href="new.html">New Entry</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="container" style="margin-top:30px;">
+<div class="row-fluid" style="text-align:center;">
+	<div class="span6 well">
+		<p style="margin:30px 0 10px; font-size:72px; color:#3366CC; font-weight:bold;">--&ordm;</p>
+		<p style="margin:30px 0 10px;">Current Temperature</p>
+		<p style="font-size:10px; color:#666; font-style:italic;">Last updated: Feb 25 2013 02:24:38 GMT-0500 (EST)</p>
+	</div>
+	<div class="span6 well">
+		<p style="margin:30px 0 10px; font-size:72px; color:#DC3912;font-weight:bold;">--&ordm;</p>
+		<p style="margin:30px 0 10px;">Thermostat Value</p>
+		<p style="font-size:10px; color:#666; font-style:italic;">Last updated: Feb 25 2013 02:24:38 GMT-0500 (EST)</p>
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span12">
+		<div id="print"></div>
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span6"></div>
+	<div class="span6"></div>
+</div>
+</div> <!--END CONTAINER-->
+</body>
+</html>
